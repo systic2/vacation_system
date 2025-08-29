@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사용자 정보 수정 - 휴가 결재 시스템</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="apply-container">
+        <h2>사용자 정보 수정</h2>
+        {% include '_messages.html' %}
+        <form action="{{ url_for('edit_user', user_id=user.id) }}" method="post">
+            <label for="username">아이디:</label>
+            <input type="text" id="username" name="username" value="{{ user.username }}" required>
+            <label for="join_date">입사일:</label>
+            <input type="date" id="join_date" name="join_date" value="{{ user.join_date }}" required>
+            <label for="part">부서:</label>
+            <input type="text" id="part" name="part" value="{{ user.part }}" required>
+            <label for="role">역할 (쉼표로 구분):</label>
+            <input type="text" id="role" name="role" value="{{ user.role }}" required>
+            <button type="submit">수정</button>
+        </form>
+        <div class="back-link">
+            <a href="{{ url_for('admin_dashboard') }}">취소</a>
+        </div>
+    </div>
+</body>
+</html>

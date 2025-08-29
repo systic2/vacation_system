@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>결재 대기 목록 - 휴가 결재 시스템</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="history-container">
+        <h2>결재 대기 목록</h2>
+        {% include '_messages.html' %}
+        {% if approval_list %}
+        <table>
+            <thead>
+                <tr>
+                    <th>신청자</th>
+                    <th>휴가 종류</th>
+                    <th>기간</th>
+                    <th>인수인계자</th>
+                    <th>사유</th>
+                    <th>상태</th>
+                    <th>액션</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in approval_list %}
+                <tr>
+                    <td>{{ item.applicant }}</td>
+                    <td>
+                        {% if item.details.vacation_type == 'annual' %}연차
+                        {% elif item.details.vacation_type == 'am_half_day' %}오전 반차
+                        {% elif item.details.vacation_type == 'pm_half_day' %}오후 반차
+                        {% endif %}
+                    </td>
+                    <td>{{ item.details.start_date }} ~ {{ item.details.end_date }}</td>
+                    <td>{{ item.details.backup }}</td>
+                    <td>{{ item.details.reason }}</td>
+                    <td class="
+                        {% if item.details.status == 'approved' %}status-approved
+                        {% elif item.details.status == 'rejected' %}status-rejected
+                        {% else %}status-pending
+                        {% endif %}
+                    ">
+                        {% if item.details.status == 'pending_part_leader' %}파트장 승인 대기
+                        {% elif item.details.status == 'pending_team_leader' %}팀장 승인 대기
+                        {% elif item.details.status == 'approved' %}승인 완료
+                        {% elif item.details.status == 'rejected' %}반려
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form action="{{ url_for('approve_vacation', vacation_id=item.id) }}" method="post" style="display:inline;">
+                            <button type="submit" class="btn-approve">승인</button>
+                        </form>
+                        <form action="{{ url_for('reject_vacation', vacation_id=item.id) }}" method="post" style="display:inline;">
+                            <button type="submit" class="btn-reject">반려</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>결재 대기 중인 신청이 없습니다.</p>
+        {% endif %}
+        <div class="back-link">
+            <a href="{{ url_for('dashboard') }}">대시보드로 돌아가기</a>
+        </div>
+    </div>
+</body>
+</html>

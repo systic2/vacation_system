@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>휴가 신청 - 휴가 결재 시스템</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="apply-container">
+        <h2>휴가 신청</h2>
+        {% include '_messages.html' %}
+        <form action="{{ url_for('apply_vacation') }}" method="post">
+            <label for="vacation_type">휴가 종류:</label>
+            <select id="vacation_type" name="vacation_type" required>
+                <option value="annual">연차</option>
+                <option value="am_half_day">오전 반차</option>
+                <option value="pm_half_day">오후 반차</option>
+            </select>
+            <label for="start_date">시작일:</label>
+            <input type="date" id="start_date" name="start_date" required>
+            <label for="end_date">종료일:</label>
+            <input type="date" id="end_date" name="end_date" required>
+            <label for="reason">사유:</label>
+            <input type="text" id="reason" name="reason" required>
+            <label for="backup">업무 인수인계자:</label>
+            <input type="text" id="backup" name="backup" required>
+            <button type="submit">신청</button>
+        </form>
+        <div class="back-link">
+            <a href="{{ url_for('dashboard') }}">취소</a>
+        </div>
+    </div>
+</body>
+</html>

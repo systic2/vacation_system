@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대시보드 - 휴가 결재 시스템</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <h2>대시보드</h2>
+        {% include '_messages.html' %}
+        <p>안녕하세요, {{ username }}님!</p>
+        <div class="actions">
+            <a href="/apply" class="btn">휴가 신청하기</a>
+            <a href="/history" class="btn">내 휴가 내역 조회</a>
+            <a href="{{ url_for('notifications') }}" class="btn">
+                알림 
+                {% if unread_notifications_count > 0 %}
+                <span class="notification-count">{{ unread_notifications_count }}</span>
+                {% endif %}
+            </a>
+            {% if '파트장' in user_roles or '팀장' in user_roles %}
+                <a href="/approvals" class="btn">결재 대기 목록</a>
+            {% endif %}
+            {% if '팀장' in user_roles %}
+                <a href="/admin" class="btn" style="background-color: #007bff;">관리자 페이지</a>
+            {% endif %}
+        </div>
+        <div class="logout-link">
+            <a href="/logout">로그아웃</a>
+        </div>
+    </div>
+</body>
+</html>
