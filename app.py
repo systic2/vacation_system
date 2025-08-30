@@ -1,35 +1,54 @@
 # app.py
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from config import Config
-from models import db, User, Vacation, Notification
+from models import db  # (User, Vacation, Notification 불러도 OK지만 임포트 시 DB 접근 금지)
 from services.vacation_service import VacationService
 from services.user_service import UserService
 from services.notification_service import NotificationService
 from services.auth_service import AuthService
 from utils.decorators import login_required, admin_required
-from utils.init_data import init_default_users
-
+from utils.init_data import init_default_users   # ← 임포트만, '호출'은 하지 않음!
+from flask_migrate import Migrate                 # ← 추가
+import click
+from flask.cli import with_appcontext
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
-    
     db.init_app(app)
     
-    with app.app_context():
-        db.create_all()
-        # 초기 사용자 데이터 생성
-        init_default_users()
+    # with app.app_context():
+    #     db.create_all()
+    #     # 초기 사용자 데이터 생성
+    #     init_default_users()
     
     return app
 
 
 app = create_app()
+migrate = Migrate(app, db)  # ← 추가
 vacation_service = VacationService()
 user_service = UserService()
 notification_service = NotificationService()
 auth_service = AuthService()
 
+@app.context_processor
+def inject_user_roles():
+    roles = []
+    username = session.get('username')
+    if username:
+        user = User.query.filter_by(username=username).first()
+        if user and user.role:
+            # 쉼표로 여러 역할이 들어갈 수 있으니 분리
+            roles = [r.strip() for r in user.role.split(',')]
+    return dict(current_user_roles=roles)
+
+# (선택) 시드 커맨드: 마이그레이션 후에 수동으로 초기 데이터 넣을 때 사용
+@app.cli.command("seed")
+@with_appcontext
+def seed_command():
+    init_default_users()
+    click.echo("✅ Seeded default users.")
 
 # Authentication Routes
 @app.route('/')
@@ -185,45 +204,42 @@ def admin():
     return render_template('admin_dashboard.html', users=users)
 
 
+# /admin/add_user
 @app.route('/admin/add_user', methods=['GET', 'POST'])
 @admin_required
 def add_user():
     if request.method == 'POST':
         user_data = {
+            'employee_number': request.form['employee_number'],  # ← 추가
             'username': request.form['username'],
-            'join_date': request.form['join_date'],
+            'join_date': request.form['join_date'],  # YYYY-MM-DD 문자열
             'part': request.form['part'],
             'role': request.form['role']
         }
-        
         result = user_service.create_user(user_data)
         flash(result['message'], result['type'])
-        
         if result['success']:
             return redirect(url_for('admin'))
-
     return render_template('add_user.html')
 
 
+# /admin/edit_user/<id>
 @app.route('/admin/edit_user/<int:user_id>', methods=['GET', 'POST'])
 @admin_required
 def edit_user(user_id):
     user = user_service.get_user_by_id(user_id)
-    
     if request.method == 'POST':
         user_data = {
+            'employee_number': request.form['employee_number'],  # ← 추가
             'username': request.form['username'],
             'join_date': request.form['join_date'],
             'part': request.form['part'],
             'role': request.form['role']
         }
-        
         result = user_service.update_user(user_id, user_data)
         flash(result['message'], result['type'])
-        
         if result['success']:
             return redirect(url_for('admin'))
-    
     return render_template('edit_user.html', user=user)
 
 
@@ -244,4 +260,6 @@ def reset_password(user_id):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    with app.app_context():
+        init_default_users()
+    app.run(debug=True, host='0.0.0.0', port=5050)

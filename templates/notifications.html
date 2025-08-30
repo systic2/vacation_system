@@ -1,29 +1,4 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>알림 - 휴가 결재 시스템</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-    <div class="history-container">
-        <h2>알림</h2>
-        {% if notifications %}
-        <ul class="notification-list">
-            {% for noti in notifications %}
-            <li>
-                <p>{{ noti.message }}</p>
-                <small>{{ noti.timestamp.strftime('%Y-%m-%d %H:%M') }}</small>
-            </li>
-            {% endfor %}
-        </ul>
-        {% else %}
-        <p>새로운 알림이 없습니다.</p>
-        {% endif %}
-        <div class="back-link">
-            <a href="{{ url_for('dashboard') }}">대시보드로 돌아가기</a>
-        </div>
-    </div>
-</body>
-</html>
+{# templates/notifications.html #} {% extends "base.html" %} {% import
+"_macros.html" as macros %} {% block title %}알림 · Vacation System{% endblock
+%} {% block page_title %}알림{% endblock %} {% block content %} {% include
+"_messages.html" with context %} {% endblock %}

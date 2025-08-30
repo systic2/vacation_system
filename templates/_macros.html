@@ -1,0 +1,36 @@
+{% macro button(text, variant='default', type='button') -%}
+  <button type="{{ type }}" class="btn {{ variant }}">{{ text }}</button>
+{%- endmacro %}
+
+{% macro input(name, label='', type='text', value='', placeholder='', required=false) -%}
+  <div>
+    {% if label %}<label class="muted">{{ label }}</label>{% endif %}
+    <input class="input" name="{{ name }}" type="{{ type }}" value="{{ value }}" placeholder="{{ placeholder }}" {% if required %}required{% endif %}>
+  </div>
+{%- endmacro %}
+
+{% macro select(name, label='', options=[], value='') -%}
+  <div>
+    {% if label %}<label class="muted">{{ label }}</label>{% endif %}
+    <select class="select" name="{{ name }}">
+      {% for opt in options %}
+        <option value="{{ opt.value }}" {% if value==opt.value %}selected{% endif %}>{{ opt.label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+{%- endmacro %}
+
+{% macro table(headers=[], rows=[]) -%}
+<table class="table">
+  <thead><tr>{% for h in headers %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+  <tbody>
+    {% for row in rows %}
+      <tr>{% for cell in row %}<td>{{ cell|safe }}</td>{% endfor %}</tr>
+    {% endfor %}
+  </tbody>
+</table>
+{%- endmacro %}
+
+{% macro badge(text, kind='success') -%}
+  <span class="badge {{ kind }}">{{ text }}</span>
+{%- endmacro %}

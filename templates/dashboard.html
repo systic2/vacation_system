@@ -1,35 +1,27 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>대시보드 - 휴가 결재 시스템</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-    <div class="dashboard-container">
-        <h2>대시보드</h2>
-        {% include '_messages.html' %}
-        <p>안녕하세요, {{ username }}님!</p>
-        <div class="actions">
-            <a href="/apply" class="btn">휴가 신청하기</a>
-            <a href="/history" class="btn">내 휴가 내역 조회</a>
-            <a href="{{ url_for('notifications') }}" class="btn">
-                알림 
-                {% if unread_notifications_count > 0 %}
-                <span class="notification-count">{{ unread_notifications_count }}</span>
-                {% endif %}
-            </a>
-            {% if '파트장' in user_roles or '팀장' in user_roles %}
-                <a href="/approvals" class="btn">결재 대기 목록</a>
-            {% endif %}
-            {% if '팀장' in user_roles %}
-                <a href="/admin" class="btn" style="background-color: #007bff;">관리자 페이지</a>
-            {% endif %}
-        </div>
-        <div class="logout-link">
-            <a href="/logout">로그아웃</a>
-        </div>
+{# templates/dashboard.html #} {% extends "base.html" %} {% import
+"_macros.html" as macros %} {% block title %}대시보드 · Vacation System{%
+endblock %} {% block page_title %}대시보드{% endblock %} {% block content %}
+<div class="grid-2">
+  <div class="card">
+    <h2>퀵 액션</h2>
+    <div class="mt-2">
+      <a class="btn primary" href="{{ url_for('apply') }}">휴가 신청</a>
+      <a class="btn" href="{{ url_for('history') }}">내 신청 내역</a>
+      <a class="btn" href="{{ url_for('notifications') }}">알림 보기</a>
+      {% if 'APPROVER' in user_roles or 'ADMIN' in user_roles %}
+      <a class="btn" href="{{ url_for('approvals') }}">결재 대기</a>
+      {% endif %} {% if 'ADMIN' in user_roles %}
+      <a class="btn" href="{{ url_for('admin') }}">관리자 대시보드</a>
+      {% endif %}
     </div>
-</body>
-</html>
+  </div>
+
+  <div class="card">
+    <h2>알림</h2>
+    <p>
+      읽지 않은 알림: <strong>{{ unread_notifications_count or 0 }}</strong> 개
+    </p>
+    <p class="muted">알림 페이지에 접속하면 자동으로 읽음 처리됩니다.</p>
+  </div>
+</div>
+{% endblock %}

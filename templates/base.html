@@ -1,0 +1,72 @@
+{# templates/base.html #}
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <title>{% block title %}Vacation System{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="{{ url_for('static', filename='css/app.css') }}"
+      rel="stylesheet"
+    />
+    {% block head %}{% endblock %}
+  </head>
+  <body>
+    {% set ep = request.endpoint %} {% set logged_in = session.get('username')
+    %} {% macro nav_link(endpoint, text, extra_active=[]) -%} {% set is_active =
+    (ep == endpoint) or (ep in extra_active) %}
+    <a
+      href="{{ url_for(endpoint) }}"
+      class="{% if is_active %}active{% endif %}"
+      >{{ text }}</a
+    >
+    {%- endmacro %} {% if logged_in %} {# 컨텍스트 프로세서로 주입된 사용자
+    역할들. 콤마로 합쳐 부분문자열 검사(개발팀장 등 대응). #} {% set roles =
+    current_user_roles if current_user_roles is defined else [] %} {% set
+    is_team_leader = '팀장' in (roles | join(',')) %}
+
+    <div class="app">
+      <aside class="sidebar">
+        <div class="brand">🌙 Vacation System</div>
+        <nav class="nav">
+          {{ nav_link('dashboard', '대시보드') }} {{ nav_link('apply', '휴가
+          신청') }} {{ nav_link('history', '내 신청 내역') }} {{
+          nav_link('approvals', '결재 대기') }} {# 관리자 메뉴는 '팀장'에게만
+          노출 #} {% if is_team_leader %} {{ nav_link('admin', '관리자',
+          ['admin','add_user','edit_user']) }} {% endif %} {{
+          nav_link('notifications', '알림') }}
+          <a href="{{ url_for('logout') }}">로그아웃</a>
+        </nav>
+      </aside>
+
+      <main class="main">
+        <div class="toolbar">
+          <h1>{% block page_title %}{% endblock %}</h1>
+          <div class="muted">
+            {{ session.get('username') }} 님
+            <span class="sep"> · </span>
+            <a class="btn" href="{{ url_for('change_password') }}"
+              >비밀번호 변경</a
+            >
+          </div>
+        </div>
+
+        {% include '_partials/_flash.html' %}
+
+        <section class="card">{% block content %}{% endblock %}</section>
+      </main>
+    </div>
+    {% else %}
+    <main class="main">
+      <div class="center" style="min-height: 100vh">
+        <div style="width: 100%; max-width: 560px">
+          <div class="card">
+            <h1>{{ self.page_title() }}</h1>
+            {% include '_partials/_flash.html' %} {{ self.content() }}
+          </div>
+        </div>
+      </div>
+    </main>
+    {% endif %} {% block scripts %}{% endblock %}
+  </body>
+</html>

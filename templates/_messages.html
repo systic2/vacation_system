@@ -1,11 +1,20 @@
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <div class="messages">
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }}">
-          {{ message }}
-        </div>
-      {% endfor %}
-    </div>
-  {% endif %}
-{% endwith %}
+{# templates/_messages.html #} {% import "_macros.html" as macros %} {% set
+items = notifications if notifications is defined else messages %}
+<table class="table">
+  <thead>
+    <tr>
+      <th>시각</th>
+      <th>메시지</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for n in items %}
+    <tr>
+      <td>
+        {{ n.timestamp.strftime('%Y-%m-%d %H:%M') if n.timestamp else '' }}
+      </td>
+      <td>{{ n.message }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

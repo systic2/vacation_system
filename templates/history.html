@@ -1,70 +1,50 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>내 휴가 내역 - 휴가 결재 시스템</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-    <div class="history-container">
-        <h2>내 휴가 내역</h2>
-        {% include '_messages.html' %}
-        {% if history %}
-        <table>
-            <thead>
-                <tr>
-                    <th>휴가 종류</th>
-                    <th>기간</th>
-                    <th>인수인계자</th>
-                    <th>사유</th>
-                    <th>상태</th>
-                    <th>액션</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in history %}
-                <tr>
-                    <td>
-                        {% if item.vacation_type == 'annual' %}연차
-                        {% elif item.vacation_type == 'am_half_day' %}오전 반차
-                        {% elif item.vacation_type == 'pm_half_day' %}오후 반차
-                        {% endif %}
-                    </td>
-                    <td>{{ item.start_date }} ~ {{ item.end_date }}</td>
-                    <td>{{ item.backup }}</td>
-                    <td>{{ item.reason }}</td>
-                    <td class="
-                        {% if item.status == 'approved' %}status-approved
-                        {% elif item.status == 'rejected' %}status-rejected
-                        {% else %}status-pending
-                        {% endif %}
-                    ">
-                        {% if item.status == 'pending_part_leader' %}파트장 승인 대기
-                        {% elif item.status == 'pending_team_leader' %}팀장 승인 대기
-                        {% elif item.status == 'approved' %}승인 완료
-                        {% elif item.status == 'rejected' %}반려
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if item.status in ['pending_part_leader', 'pending_team_leader'] %}
-                        <form action="{{ url_for('cancel_vacation', vacation_id=item.id) }}" method="post">
-                            <button type="submit" class="btn-cancel">취소</button>
-                        </form>
-                        {% else %}
-                        -
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+{% extends "base.html" %} {% import "_macros.html" as macros %} {% block title
+%}내 휴가 내역 · Vacation System{% endblock %} {% block page_title %}내 휴가
+신청 내역{% endblock %} {% block content %} {% set type_labels =
+{'annual':'연차','am_half_day':'반차(오전)','pm_half_day':'반차(오후)'} %} {%
+set status_labels = { 'pending_part_leader':'결재 대기(파트장)',
+'pending_team_leader':'결재 대기(팀장)', 'approved':'승인', 'rejected':'반려' }
+%}
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>종류</th>
+      <th>기간</th>
+      <th>사유</th>
+      <th>상태</th>
+      <th>작업</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for v in history %} {% set s = (v.status|string) %} {% set is_pending = s
+    in ['pending_part_leader','pending_team_leader'] %}
+    <tr>
+      <td>{{ type_labels.get(v.vacation_type, v.vacation_type) }}</td>
+      <td>{{ v.start_date }} ~ {{ v.end_date }}</td>
+      <td>{{ v.reason }}</td>
+      <td>
+        <span
+          class="badge {{ 'warn' if is_pending else ('success' if s=='approved' else 'danger') }}"
+        >
+          {{ status_labels.get(s, s) }}
+        </span>
+      </td>
+      <td>
+        {% if is_pending %}
+        <form
+          method="post"
+          action="{{ url_for('cancel_vacation', vacation_id=v.id) }}"
+          style="display: inline"
+        >
+          <button class="btn danger" type="submit">취소</button>
+        </form>
         {% else %}
-        <p>신청한 휴가 내역이 없습니다.</p>
+        <span class="muted">-</span>
         {% endif %}
-        <div class="back-link">
-            <a href="{{ url_for('dashboard') }}">대시보드로 돌아가기</a>
-        </div>
-    </div>
-</body>
-</html>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
